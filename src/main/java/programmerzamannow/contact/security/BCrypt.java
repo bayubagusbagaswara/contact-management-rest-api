@@ -361,7 +361,7 @@ public class BCrypt {
      */
     private static int[] streamtowords(byte data[], int offp[], int signp[]) {
         int i;
-        int words[] = { 0, 0 };
+        int[] words = { 0, 0 };
         int off = offp[0];
         int sign = signp[0];
 

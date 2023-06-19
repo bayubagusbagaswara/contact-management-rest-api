@@ -11,4 +11,4 @@ CREATE TABLE contacts (
     CONSTRAINT fk_users_contacts FOREIGN KEY (username) REFERENCES users (username)
 );
 
-SELECT * FROM contacts;
+SELECT * FROM "public".contacts;

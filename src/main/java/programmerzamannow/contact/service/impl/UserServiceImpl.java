@@ -1,6 +1,8 @@
 package programmerzamannow.contact.service.impl;
 
+import jakarta.validation.Validator;
 import org.springframework.stereotype.Service;
+import programmerzamannow.contact.dto.RegisterUserRequest;
 import programmerzamannow.contact.repository.UserRepository;
 import programmerzamannow.contact.service.UserService;
 
@@ -8,9 +10,11 @@ import programmerzamannow.contact.service.UserService;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final Validator validator;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, Validator validator) {
         this.userRepository = userRepository;
+        this.validator = validator;
     }
 
 

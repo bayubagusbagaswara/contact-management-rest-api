@@ -12,6 +12,7 @@ import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.UserRepository;
 import programmerzamannow.contact.security.BCrypt;
 import programmerzamannow.contact.service.UserService;
+import programmerzamannow.contact.service.ValidationService;
 
 import java.util.Set;
 
@@ -19,22 +20,18 @@ import java.util.Set;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final Validator validator;
 
-    public UserServiceImpl(UserRepository userRepository, Validator validator) {
+    private final ValidationService validationService;
+
+    public UserServiceImpl(UserRepository userRepository, ValidationService validationService) {
         this.userRepository = userRepository;
-        this.validator = validator;
+        this.validationService = validationService;
     }
 
     @Transactional
     @Override
     public void register(RegisterUserRequest registerUserRequest) {
-        Set<ConstraintViolation<RegisterUserRequest>> constraintViolations = validator.validate(registerUserRequest);
-
-        if (constraintViolations.size() != 0) {
-            // error
-            throw new ConstraintViolationException(constraintViolations);
-        }
+        validationService.validate(registerUserRequest);
 
         if (userRepository.existsById(registerUserRequest.getUsername())) {
             // user is already exist

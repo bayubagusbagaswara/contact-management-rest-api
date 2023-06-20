@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import programmerzamannow.contact.dto.RegisterUserRequest;
 import programmerzamannow.contact.dto.WebResponse;
+import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.UserRepository;
+import programmerzamannow.contact.security.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -63,6 +65,34 @@ class UserControllerTest {
         request.setUsername("");
         request.setPassword("");
         request.setName("");
+
+        mockMvc.perform(
+                post("/api/users")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void testRegisterDuplicate() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(BCrypt.hashpw("rahasia", BCrypt.gensalt()));
+        user.setName("Tests");
+        userRepository.save(user);
+
+        RegisterUserRequest request = new RegisterUserRequest();
+        request.setUsername("test");
+        request.setPassword("rahasia");
+        request.setName("Tests");
 
         mockMvc.perform(
                 post("/api/users")

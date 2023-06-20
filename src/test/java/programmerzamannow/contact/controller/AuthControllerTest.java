@@ -1,5 +1,6 @@
 package programmerzamannow.contact.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,7 +12,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import programmerzamannow.contact.dto.LoginUserRequest;
 import programmerzamannow.contact.dto.WebResponse;
+import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.UserRepository;
+import programmerzamannow.contact.security.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -56,4 +59,31 @@ class AuthControllerTest {
         });
     }
 
+    @Test
+    void loginFailedWrongPassword() throws Exception {
+        User user = new User();
+        user.setName("Test");
+        user.setUsername("test");
+        user.setPassword(BCrypt.hashpw("test", BCrypt.gensalt()));
+        userRepository.save(user);
+
+
+        LoginUserRequest request = new LoginUserRequest();
+        request.setUsername("test");
+        request.setPassword("salah");
+
+        mockMvc.perform(
+                post("/api/auth/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+            assertNotNull(response.getErrors());
+        });
+    }
 }

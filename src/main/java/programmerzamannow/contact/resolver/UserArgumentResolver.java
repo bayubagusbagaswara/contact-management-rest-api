@@ -2,6 +2,7 @@ package programmerzamannow.contact.resolver;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.UserRepository;
 
+@Slf4j
 @Component
 public class UserArgumentResolver implements HandlerMethodArgumentResolver {
     
@@ -40,6 +42,8 @@ public class UserArgumentResolver implements HandlerMethodArgumentResolver {
         // cek ke database
         User user = userRepository.findFirstByToken(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Unauthorized"));
+
+        log.info("USER {}", user);
 
         // cek token expired apakah lewat dengan waktu sekarang
         if (user.getTokenExpiredAt() < System.currentTimeMillis()) {

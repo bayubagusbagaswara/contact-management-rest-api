@@ -125,4 +125,21 @@ class UserControllerTest {
             assertNotNull(response.getErrors());
         });
     }
+
+    @Test
+    void getUserUnauthorizedTokenNotSent() throws Exception {
+        // token sama sekali tidak dikirimkan
+        mockMvc.perform(
+                get("/api/users/current")
+                        .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
 }

@@ -5,12 +5,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import programmerzamannow.contact.dto.RegisterUserRequest;
+import programmerzamannow.contact.dto.UpdateUserRequest;
 import programmerzamannow.contact.dto.UserResponse;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.UserRepository;
 import programmerzamannow.contact.security.BCrypt;
 import programmerzamannow.contact.service.UserService;
 import programmerzamannow.contact.service.ValidationService;
+
+import java.util.Objects;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -47,6 +50,28 @@ public class UserServiceImpl implements UserService {
         return UserResponse.builder()
                 .username(user.getUsername())
                 .name(user.getName())
+                .build();
+    }
+
+    @Transactional
+    @Override
+    public UserResponse update(User user, UpdateUserRequest request) {
+        validationService.validate(request);
+
+        // jika object request tidak null, lalu cek didalam object yakni field name tidak null
+        if (Objects.nonNull(request.getName())) {
+            user.setName(request.getName());
+        }
+
+        if (Objects.nonNull(request.getPassword())) {
+            user.setPassword(BCrypt.hashpw(request.getPassword(), BCrypt.gensalt()));
+        }
+
+        userRepository.save(user);
+
+        return UserResponse.builder()
+                .name(user.getName())
+                .username(user.getUsername())
                 .build();
     }
 }

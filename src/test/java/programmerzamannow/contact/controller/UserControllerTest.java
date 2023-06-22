@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import programmerzamannow.contact.dto.RegisterUserRequest;
+import programmerzamannow.contact.dto.UpdateUserRequest;
 import programmerzamannow.contact.dto.UserResponse;
 import programmerzamannow.contact.dto.WebResponse;
 import programmerzamannow.contact.entity.User;
@@ -184,6 +185,25 @@ class UserControllerTest {
                 get("/api/users/current")
                         .accept(MediaType.APPLICATION_JSON)
                         .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+
+            assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void updateUserUnauthorized() throws Exception {
+        UpdateUserRequest request = new UpdateUserRequest();
+
+        mockMvc.perform(
+                patch("/api/users/current")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(
                 status().isUnauthorized()
         ).andDo(result -> {

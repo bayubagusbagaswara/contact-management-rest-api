@@ -18,6 +18,7 @@ import programmerzamannow.contact.repository.UserRepository;
 import programmerzamannow.contact.security.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -123,4 +124,21 @@ class AuthControllerTest {
             assertEquals(userDb.getTokenExpiredAt(), response.getData().getExpiredAt());
         });
     }
+
+    @Test
+    void logoutFailed() throws Exception {
+
+        mockMvc.perform(
+                delete("/api/auth/logout")
+                        .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(
+                status().isUnauthorized()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(),
+                    new TypeReference<>() {
+                    });
+            assertNotNull(response.getErrors());
+        });
+    }
+
 }

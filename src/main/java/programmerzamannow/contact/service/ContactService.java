@@ -2,8 +2,9 @@ package programmerzamannow.contact.service;
 
 import programmerzamannow.contact.dto.ContactResponse;
 import programmerzamannow.contact.dto.CreateContactRequest;
+import programmerzamannow.contact.entity.User;
 
 public interface ContactService {
 
-    ContactResponse create(CreateContactRequest request);
+    ContactResponse create(User currentUser, CreateContactRequest request);
 }

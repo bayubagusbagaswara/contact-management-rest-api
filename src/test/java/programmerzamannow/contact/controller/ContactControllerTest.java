@@ -1,5 +1,6 @@
 package programmerzamannow.contact.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import programmerzamannow.contact.dto.ContactResponse;
 import programmerzamannow.contact.dto.CreateContactRequest;
 import programmerzamannow.contact.dto.WebResponse;
 import programmerzamannow.contact.entity.User;
@@ -73,5 +75,35 @@ class ContactControllerTest {
             assertNotNull(response.getErrors());
         });
     }
-    
+
+    @Test
+    void createContactSuccess() throws Exception {
+        CreateContactRequest request = new CreateContactRequest();
+        request.setFirstName("Bayu");
+        request.setLastName("Bagaswara");
+        request.setEmail("bayu@mail.com");
+        request.setPhone("085123456789");
+
+        mockMvc.perform(
+                post("/api/contacts")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<ContactResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<ContactResponse>>() {
+            });
+
+            assertNull(response.getErrors());
+            assertEquals("Bayu", response.getData().getFirstName());
+            assertEquals("Bagaswara", response.getData().getLastName());
+            assertEquals("bayu@mail.com", response.getData().getEmail());
+            assertEquals("085123456789", response.getData().getPhone());
+
+            assertTrue(contactRepository.existsById(response.getData().getId()));
+        });
+    }
+
 }

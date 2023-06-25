@@ -1,7 +1,9 @@
 package programmerzamannow.contact.service.impl;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 import programmerzamannow.contact.dto.ContactResponse;
 import programmerzamannow.contact.dto.CreateContactRequest;
 import programmerzamannow.contact.entity.Contact;
@@ -38,6 +40,9 @@ public class ContactServiceImpl implements ContactService {
 
         contactRepository.save(contact);
 
+        return toContactResponse(contact);
+    }
+    private ContactResponse toContactResponse(Contact contact) {
         return ContactResponse.builder()
                 .id(contact.getId())
                 .firstName(contact.getFirstName())

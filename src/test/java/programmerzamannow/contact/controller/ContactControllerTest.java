@@ -3,6 +3,7 @@ package programmerzamannow.contact.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,10 +14,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import programmerzamannow.contact.dto.ContactResponse;
 import programmerzamannow.contact.dto.CreateContactRequest;
 import programmerzamannow.contact.dto.WebResponse;
+import programmerzamannow.contact.entity.Contact;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.ContactRepository;
 import programmerzamannow.contact.repository.UserRepository;
 import programmerzamannow.contact.security.BCrypt;
+
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -120,6 +124,40 @@ class ContactControllerTest {
             });
 
             assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void getContactSuccess() throws Exception {
+        User user = userRepository.findById("test").orElseThrow();
+
+        Contact contact = new Contact();
+        contact.setId(UUID.randomUUID().toString());
+        contact.setUser(user);
+        contact.setFirstName("Bayu");
+        contact.setLastName("Bagaswaras");
+        contact.setEmail("bayu@mail.com");
+        contact.setPhone("082211211211");
+        contactRepository.save(contact);
+
+        mockMvc.perform(
+                get("/api/contacts/" + contact.getId())
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<ContactResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<ContactResponse>>() {
+            });
+
+            assertNull(response.getErrors());
+
+            assertEquals(contact.getId(), response.getData().getId());
+            assertEquals(contact.getFirstName(), response.getData().getFirstName());
+            assertEquals(contact.getLastName(), response.getData().getLastName());
+            assertEquals(contact.getEmail(), response.getData().getEmail());
+            assertEquals(contact.getPhone(), response.getData().getPhone());
         });
     }
 

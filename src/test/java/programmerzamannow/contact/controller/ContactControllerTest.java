@@ -11,9 +11,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import programmerzamannow.contact.dto.ContactResponse;
-import programmerzamannow.contact.dto.CreateContactRequest;
-import programmerzamannow.contact.dto.WebResponse;
+import programmerzamannow.contact.dto.*;
 import programmerzamannow.contact.entity.Contact;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.ContactRepository;
@@ -161,5 +159,25 @@ class ContactControllerTest {
         });
     }
 
+    @Test
+    void updateContactBadRequest() throws Exception {
+        UpdateContactRequest request = new UpdateContactRequest();
+        request.setFirstName("");
+        request.setEmail("salah");
 
+        mockMvc.perform(
+                put("/api/contacts/1234")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+            assertNotNull(response.getErrors());
+        });
+
+    }
 }

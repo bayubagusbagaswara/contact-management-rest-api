@@ -226,7 +226,7 @@ class ContactControllerTest {
     @Test
     void deleteContactNotFound() throws Exception {
         mockMvc.perform(
-                get("/api/contacts/12345")
+                delete("/api/contacts/12345")
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-API-TOKEN", "test")

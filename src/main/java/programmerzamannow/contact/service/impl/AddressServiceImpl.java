@@ -6,6 +6,7 @@ import programmerzamannow.contact.dto.AddressResponse;
 import programmerzamannow.contact.dto.CreateAddressRequest;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.AddressRepository;
+import programmerzamannow.contact.repository.ContactRepository;
 import programmerzamannow.contact.service.AddressService;
 import programmerzamannow.contact.service.ValidationService;
 
@@ -14,10 +15,13 @@ public class AddressServiceImpl implements AddressService {
 
     private final AddressRepository addressRepository;
 
+    private final ContactRepository contactRepository;
+
     private final ValidationService validationService;
 
-    public AddressServiceImpl(AddressRepository addressRepository, ValidationService validationService) {
+    public AddressServiceImpl(AddressRepository addressRepository, ContactRepository contactRepository, ValidationService validationService) {
         this.addressRepository = addressRepository;
+        this.contactRepository = contactRepository;
         this.validationService = validationService;
     }
 

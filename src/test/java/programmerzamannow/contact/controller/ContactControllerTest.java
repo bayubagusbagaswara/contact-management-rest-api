@@ -293,4 +293,48 @@ class ContactControllerTest {
         });
     }
 
+    @Test
+    void searchUsingName() throws Exception {
+        User user = userRepository.findById("test").orElseThrow();
+
+        for (int i = 0; i < 100; i++) {
+            Contact contact = new Contact();
+            contact.setId(UUID.randomUUID().toString());
+            contact.setUser(user);
+            contact.setFirstName("Bayu " + i);
+            contact.setLastName("Bagaswara");
+            contact.setEmail("bayu@mail.com");
+            contact.setPhone("082211211211");
+            contactRepository.save(contact);
+        }
+
+        Contact contact = new Contact();
+        contact.setId(UUID.randomUUID().toString());
+        contact.setUser(user);
+        contact.setFirstName("Viento");
+        contact.setLastName("Bagus");
+        contact.setEmail("viento@mail.com");
+        contact.setPhone("085123456789");
+        contactRepository.save(contact);
+
+        mockMvc.perform(
+                get("/api/contacts")
+                        .queryParam("name", "Bayu")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<List<ContactResponse>> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<List<ContactResponse>>>() {
+            });
+
+            assertNull(response.getErrors());
+            assertEquals(10, response.getData().size());
+            assertEquals(10, response.getPaging().getTotalPage());
+            assertEquals(0, response.getPaging().getCurrentPage());
+            assertEquals(10, response.getPaging().getSize());
+        });
+    }
+
 }

@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
+import programmerzamannow.contact.entity.Contact;
+import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.AddressRepository;
 import programmerzamannow.contact.repository.ContactRepository;
 import programmerzamannow.contact.repository.UserRepository;
+import programmerzamannow.contact.security.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -39,5 +42,24 @@ class AddressControllerTest {
         addressRepository.deleteAll();
         contactRepository.deleteAll();
         userRepository.deleteAll();
+
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(BCrypt.hashpw("test", BCrypt.gensalt()));
+        user.setName("Test");
+        user.setToken("test");
+        user.setTokenExpiredAt(System.currentTimeMillis() + 1000000);
+        userRepository.save(user);
+
+        Contact contact = new Contact();
+        contact.setId("test");
+        contact.setUser(user);
+        contact.setFirstName("Bayu");
+        contact.setLastName("Bagaswara");
+        contact.setEmail("bayu@mail.com");
+        contact.setPhone("082211211211");
+        contactRepository.save(contact);
     }
+
+
 }

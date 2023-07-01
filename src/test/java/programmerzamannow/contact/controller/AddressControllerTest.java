@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import programmerzamannow.contact.dto.AddressResponse;
 import programmerzamannow.contact.dto.CreateAddressRequest;
 import programmerzamannow.contact.dto.WebResponse;
 import programmerzamannow.contact.entity.Contact;
@@ -84,6 +85,37 @@ class AddressControllerTest {
             WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
             });
             assertNotNull(response.getErrors());
+        });
+    }
+
+    @Test
+    void createAddressSuccess() throws Exception {
+        CreateAddressRequest request = new CreateAddressRequest();
+        request.setStreet("Jalan");
+        request.setCity("Jakarta");
+        request.setProvince("DKI");
+        request.setCountry("Indonesia");
+        request.setPostalCode("123123");
+
+        mockMvc.perform(
+                post("/api/contacts/test/addresses")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isOk()
+        ).andDo(result -> {
+            WebResponse<AddressResponse> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<AddressResponse>>() {
+            });
+            assertNull(response.getErrors());
+            assertEquals(request.getStreet(), response.getData().getStreet());
+            assertEquals(request.getCity(), response.getData().getCity());
+            assertEquals(request.getProvince(), response.getData().getProvince());
+            assertEquals(request.getCountry(), response.getData().getCountry());
+            assertEquals(request.getPostalCode(), response.getData().getPostalCode());
+
+            assertTrue(addressRepository.existsById(response.getData().getId()));
         });
     }
 

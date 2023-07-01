@@ -22,6 +22,7 @@ import programmerzamannow.contact.security.BCrypt;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -116,6 +117,22 @@ class AddressControllerTest {
             assertEquals(request.getPostalCode(), response.getData().getPostalCode());
 
             assertTrue(addressRepository.existsById(response.getData().getId()));
+        });
+    }
+
+    @Test
+    void getAddressNotFound() throws Exception {
+        mockMvc.perform(
+                get("/api/contacts/test/addresses/test")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isNotFound()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+            assertNotNull(response.getErrors());
         });
     }
 

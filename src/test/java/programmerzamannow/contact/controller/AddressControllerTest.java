@@ -1,12 +1,17 @@
 package programmerzamannow.contact.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import programmerzamannow.contact.dto.CreateAddressRequest;
+import programmerzamannow.contact.dto.WebResponse;
 import programmerzamannow.contact.entity.Contact;
 import programmerzamannow.contact.entity.User;
 import programmerzamannow.contact.repository.AddressRepository;
@@ -17,6 +22,7 @@ import programmerzamannow.contact.security.BCrypt;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -61,5 +67,24 @@ class AddressControllerTest {
         contactRepository.save(contact);
     }
 
+    @Test
+    void createAddressBadRequest() throws Exception {
+        CreateAddressRequest request = new CreateAddressRequest();
+        request.setCountry("");
+
+        mockMvc.perform(
+                post("/api/contacts/test/addresses")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))
+                        .header("X-API-TOKEN", "test")
+        ).andExpectAll(
+                status().isBadRequest()
+        ).andDo(result -> {
+            WebResponse<String> response = objectMapper.readValue(result.getResponse().getContentAsString(), new TypeReference<WebResponse<String>>() {
+            });
+            assertNotNull(response.getErrors());
+        });
+    }
 
 }
